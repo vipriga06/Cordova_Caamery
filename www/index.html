@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Caamery</title>
+		<link rel="stylesheet" href="css/index.css" />
+	</head>
+	<body>
+		<div id="flash-overlay"></div>
+		<main class="app">
+			<h1>Caamery</h1>
+			<p>A simple camera app to make photos with your webcam!</p>
+
+			<button id="btn-capture" type="button">Activar cámara</button>
+
+			<figure class="preview">
+				<video id="video" playsinline muted></video>
+				<img id="image" alt="Vista previa" />
+			</figure>
+
+			<div class="button-group">
+				<button id="btn-take-photo" type="button" style="display: none;">📷 Capturar foto</button>
+				<button id="btn-gallery" type="button" style="display: none;">📁</button>
+			</div>
+
+			<div id="gallery-dropdown" class="gallery-dropdown" style="display: none;">
+				<div class="gallery-header">
+					<h3>Fotos capturadas</h3>
+					<button id="btn-close-gallery" type="button">×</button>
+				</div>
+				<div id="gallery-grid" class="gallery-grid"></div>
+			</div>		</main>
+
+		<!-- Scripts -->
+		<script src="cordova.js"></script>
+		<script src="js/index.js"></script>
+	</body>
+</html>

@@ -1,0 +1,273 @@
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+#flash-overlay {
+	position: fixed;
+	inset: 0;
+	background: #ffffff;
+	opacity: 0;
+	pointer-events: none;
+	z-index: 9999;
+	transition: opacity 0.1s ease;
+}
+
+#flash-overlay.flash {
+	opacity: 0.95;
+}
+
+body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	background: #000000;
+	color: #f3f4f6;
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+}
+
+.app {
+	width: 100%;
+	max-width: 480px;
+	background: #1a1a1a;
+	border-radius: 16px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+	padding: 24px;
+	text-align: center;
+	display: grid;
+	gap: 16px;
+}
+
+h1 {
+	font-size: 1.5rem;
+	color: #ffffff;
+}
+
+p {
+	color: #9ca3af;
+	font-size: 0.95rem;
+}
+
+#btn-capture {
+	appearance: none;
+	border: none;
+	border-radius: 12px;
+	padding: 12px 16px;
+	background: #2563eb;
+	color: #ffffff;
+	font-weight: 600;
+	cursor: pointer;
+	transition: transform 0.05s ease, background 0.2s ease;
+}
+
+#btn-capture:hover {
+	background: #1d4ed8;
+}
+
+#btn-capture.is-danger {
+	background: #dc2626;
+}
+
+#btn-capture.is-danger:hover {
+	background: #b91c1c;
+}
+
+#btn-capture:active {
+	transform: scale(0.98);
+}
+
+.button-group {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	transition: all 0.3s ease;
+}
+
+#btn-take-photo {
+	appearance: none;
+	border: none;
+	border-radius: 12px;
+	padding: 12px 16px;
+	background: #059669;
+	color: #ffffff;
+	font-weight: 600;
+	font-size: 1rem;
+	cursor: pointer;
+	opacity: 0;
+	transform: translateY(10px) scaleX(0.8);
+	flex: 0;
+	width: 0;
+	margin: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	transition: opacity 0.15s ease, transform 0.3s ease, flex 0.3s ease 0.1s, width 0.2s ease, margin 0.3s ease 0.1s;
+}
+
+#btn-take-photo.show {
+	opacity: 1;
+	transform: translateY(0) scaleX(1);
+	flex: 1;
+	width: auto;
+	margin: 0;
+	transition: opacity 0.3s ease, transform 0.3s ease, flex 0.3s ease, width 0.3s ease, margin 0.3s ease;
+}
+
+#btn-take-photo:hover {
+	background: #047857;
+}
+
+#btn-take-photo:active {
+	transform: scale(0.98);
+}
+
+#btn-gallery {
+	appearance: none;
+	border: none;
+	border-radius: 12px;
+	width: 48px;
+	height: 48px;
+	background: #6366f1;
+	color: #ffffff;
+	font-size: 1.2rem;
+	cursor: pointer;
+	opacity: 0;
+	transform: scale(0);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	order: 2;
+	transition: opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
+	            transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+	            order 0.4s ease;
+}
+
+#btn-gallery.show {
+	opacity: 1;
+	transform: scale(1);
+	order: 3;
+}
+
+#btn-gallery:hover {
+	background: #4f46e5;
+}
+
+#btn-gallery:active {
+	transform: scale(0.95);
+}
+
+.gallery-dropdown {
+	background: #262626;
+	border-radius: 12px;
+	padding: 16px;
+	max-height: 400px;
+	overflow-y: auto;
+	opacity: 0;
+	transform: translateY(-10px);
+	transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.gallery-dropdown.show {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.gallery-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 12px;
+}
+
+.gallery-header h3 {
+	font-size: 1rem;
+	color: #ffffff;
+	margin: 0;
+}
+
+#btn-close-gallery {
+	appearance: none;
+	border: none;
+	background: transparent;
+	color: #9ca3af;
+	font-size: 1.5rem;
+	cursor: pointer;
+	padding: 0;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 6px;
+	transition: background 0.2s ease;
+}
+
+#btn-close-gallery:hover {
+	background: #3f3f3f;
+}
+
+.gallery-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+	gap: 8px;
+}
+
+.gallery-item {
+	position: relative;
+	border-radius: 8px;
+	overflow: hidden;
+	aspect-ratio: 1;
+	cursor: pointer;
+	transition: transform 0.2s ease;
+}
+
+.gallery-item:hover {
+	transform: scale(1.05);
+}
+
+.gallery-item img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.gallery-empty {
+	text-align: center;
+	color: #6b7280;
+	padding: 32px;
+	font-size: 0.9rem;
+}
+
+.preview {
+	width: 100%;
+	max-width: 100%;
+	background: #f3f4f6;
+	border-radius: 12px;
+	overflow: hidden;
+	aspect-ratio: 4 / 3;
+	display: grid;
+	place-items: center;
+}
+
+#video,
+#image {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	max-width: 100%;
+	opacity: 0;
+	transition: opacity 0.4s ease;
+	pointer-events: none;
+}
+
+#video {
+	transform: scaleX(-1);
+}
+
+#video.is-active,
+#image.is-active {
+	opacity: 1;
+	pointer-events: auto;
+}
