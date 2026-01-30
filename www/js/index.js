@@ -17,10 +17,14 @@ const Elements = {
 const Config = {
 	VIDEO_CONSTRAINTS: {
 		video: {
-			width: { ideal: 1920 },
-			height: { ideal: 1080 },
-			frameRate: { ideal: 60, min: 30 }
+			facingMode: 'environment',
+			width: { ideal: 1280 },
+			height: { ideal: 720 }
 		},
+		audio: false
+	},
+	VIDEO_CONSTRAINTS_FALLBACK: {
+		video: true,
 		audio: false
 	},
 	FLASH_DURATION: 150,
@@ -30,12 +34,52 @@ const Config = {
 	GALLERY_CLOSE_DELAY: 300
 };
 
+// ============== DEBUG ==============
+function logDebug(message) {
+	console.log('[Caamery] ' + message);
+	// Debug info deshabilitado en la UI
+}
 
 
 function initializeApp() {
+	logDebug('App inicializada');
+	logDebug('Cordova disponible: ' + isCordovaAvailable());
+	logDebug('getUserMedia disponible: ' + (navigator.mediaDevices && !!navigator.mediaDevices.getUserMedia));
+	logDebug('Plataforma: ' + (window.cordova ? window.cordova.platformId : 'Web'));
+	
 	cacheElements();
 	setupEventListeners();
 	initializeCaptureButton();
+	
+	// Solicitar permisos de cámara al inicio en Android
+	if (isCordovaAvailable()) {
+		requestCameraPermissionsOnStartup();
+	}
+}
+
+function requestCameraPermissionsOnStartup() {
+	if (!window.AndroidPermission) {
+		logDebug('Plugin de permisos no disponible');
+		return;
+	}
+	
+	logDebug('Solicitando permisos de cámara al inicio...');
+	
+	// Solicitar múltiples permisos a la vez
+	const permissions = [
+		window.AndroidPermission.PERMISSION.CAMERA,
+		window.AndroidPermission.PERMISSION.WRITE_EXTERNAL_STORAGE,
+		window.AndroidPermission.PERMISSION.READ_EXTERNAL_STORAGE
+	];
+	
+	window.AndroidPermission.requestPermissions(permissions,
+		() => {
+			logDebug('✓ Todos los permisos concedidos');
+		},
+		(deniedPermissions) => {
+			logDebug('⚠ Algunos permisos denegados: ' + JSON.stringify(deniedPermissions));
+		}
+	);
 }
 
 function cacheElements() {
@@ -99,14 +143,12 @@ function handleCaptureButtonClick() {
 }
 
 function isCordovaAvailable() {
-	return navigator.camera && window.cordova && window.cordova.platformId !== 'browser';
+	return window.cordova && window.cordova.platformId !== 'browser';
 }
 
 function handleCordovaCamera() {
-	navigator.camera.getPicture(onPhotoSuccess, onPhotoError, {
-		quality: 50,
-		destinationType: Camera.DestinationType.FILE_URI
-	});
+	// En Cordova también usamos getUserMedia para vista en tiempo real
+	handleWebCamera();
 }
 
 function handleWebCamera() {
@@ -130,6 +172,8 @@ function startWebCamera() {
 	if (AppState.webCameraActive) return;
 
 	clearPreviousImage();
+	
+	logDebug('Iniciando cámara...');
 	requestCameraStream();
 }
 
@@ -155,10 +199,19 @@ function clearPreviousImage() {
 }
 
 function requestCameraStream() {
+	logDebug('Solicitando acceso a cámara...');
 	navigator.mediaDevices
 		.getUserMedia(Config.VIDEO_CONSTRAINTS)
 		.then(handleStreamSuccess)
-		.catch(handleStreamError);
+		.catch((err) => {
+			logDebug('Primer intento con restricciones fallido: ' + err.name);
+			console.warn('Primer intento con restricciones fallido, intentando con restricciones flexibles...', err);
+			// Intentar con restricciones más flexibles
+			navigator.mediaDevices
+				.getUserMedia(Config.VIDEO_CONSTRAINTS_FALLBACK)
+				.then(handleStreamSuccess)
+				.catch(handleStreamError);
+		});
 }
 
 function handleStreamSuccess(stream) {
@@ -177,7 +230,23 @@ function handleStreamSuccess(stream) {
 }
 
 function handleStreamError(err) {
-	alert('No se pudo acceder a la cámara: ' + err.message);
+	console.error('Error al acceder a la cámara:', err);
+	
+	let errorMessage = 'No se pudo acceder a la cámara';
+	
+	if (err.name === 'NotAllowedError') {
+		errorMessage = 'Permiso de cámara denegado.';
+	} else if (err.name === 'NotFoundError') {
+		errorMessage = 'No se encontró ninguna cámara en el dispositivo.';
+	} else if (err.name === 'NotReadableError') {
+		errorMessage = 'No se puede acceder a la cámara. ¿Está siendo usada por otra aplicación?';
+	} else if (err.name === 'OverconstrainedError') {
+		errorMessage = 'Las restricciones de video no son soportadas por tu cámara.';
+	} else if (err.message) {
+		errorMessage = errorMessage + ': ' + err.message;
+	}
+	
+	alert(errorMessage);
 }
 
 function stopWebCamera() {
@@ -401,41 +470,4 @@ function updateGalleryButtonVisibility(show) {
 			Elements.galleryButton.style.display = 'none';
 		}, Config.GALLERY_CLOSE_DELAY);
 	}
-}
-
-// ============== CALLBACKS CORDOVA ==============
-function onPhotoSuccess(imageURI) {
-	if (isCordovaAvailable()) {
-		handleCordovaPhotoResult(imageURI);
-	} else {
-		handleWebPhotoResult(imageURI);
-	}
-}
-
-function handleCordovaPhotoResult(imageURI) {
-	if (window.resolveLocalFileSystemURL) {
-		window.resolveLocalFileSystemURL(imageURI, (entry) => {
-			displayPhotoResult(entry.toURL());
-		}, onPhotoError);
-	}
-}
-
-function handleWebPhotoResult(imageURI) {
-	displayPhotoResult(imageURI);
-}
-
-function displayPhotoResult(imageUrl) {
-	if (Elements.image) {
-		Elements.image.src = imageUrl;
-	}
-	if (Elements.video) {
-		Elements.video.classList.remove('is-active');
-	}
-	if (Elements.image) {
-		Elements.image.classList.add('is-active');
-	}
-}
-
-function onPhotoError(message) {
-	alert('Failed because: ' + message);
 }

@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="org.apache.cordova.hellocordova" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Hello Cordova</name>
+    <name>Caamery</name>
     <description>
-        A sample Apache Cordova application that responds to the deviceready event.
+        A simple camera app to make photos with your webcam!
     </description>
     <author email="dev@cordova.apache.org" href="https://cordova.apache.org">
         Apache Cordova Team
@@ -10,4 +10,27 @@
     <content src="index.html" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
+    
+    <!-- Permitir acceso a recursos multimedia -->
+    <access origin="*" />
+    <allow-navigation href="*" />
+    
+    <!-- Hooks para agregar permisos -->
+    <hook type="after_prepare" src="hooks/add_permissions.js" />
+    
+    <!-- Configuración para Android -->
+    <platform name="android">
+        <preference name="AndroidInsecureFileModeEnabled" value="true" />
+        <preference name="AndroidXEnabled" value="true" />
+        <preference name="GradlePluginKotlinEnabled" value="true" />
+        <preference name="android-minSdkVersion" value="24" />
+        <!-- Habilitar WebRTC y acceso a cámara por defecto -->
+        <preference name="android.useAndroidX" value="true" />
+        <preference name="android.incrementalDexBuild" value="true" />
+    </platform>
+    
+    <!-- Permitir autoplay de video y acceso a cámara -->
+    <preference name="AllowInlineMediaPlayback" value="true" />
+    <preference name="MediaPlaybackRequiresUserAction" value="false" />
+    <preference name="permissions" value="camera" />
 </widget>
